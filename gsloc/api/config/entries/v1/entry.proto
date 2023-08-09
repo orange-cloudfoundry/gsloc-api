@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package gsloc.api.config.entries.v1;
+
+import "validate/validate.proto";
+import "gsloc/api/config/permission/v1/permission.proto";
+import "gsloc/api/config/healthchecks/v1/healthcheck.proto";
+
+option go_package = "github.com/orange-cloudfoundry/gsloc-go-sdk/gsloc/api/config/entries/v1;entries";
+
+enum LBAlgo {
+  ROUND_ROBIN = 0;
+  TOPOLOGY = 1;
+  RATIO = 2;
+  RETURN_TO_DNS = 3;
+}
+
+message Entry {
+  string fqdn = 1 [(validate.rules).string = {min_len: 1}];
+  LBAlgo lb_algo_preferred = 2;
+  LBAlgo lb_algo_alternate = 3;
+  LBAlgo lb_algo_fallback = 4;
+  uint32 max_answer_returned = 5 [(validate.rules).uint32 = {lt: 100}];
+  repeated Member members_ipv4 = 6;
+  repeated Member members_ipv6 = 7;
+  uint32 ttl = 8;
+  repeated permission.v1.ElementPermission permissions = 9;
+  repeated string tags = 10;
+}
+
+message Member {
+  string ip = 1 [(validate.rules).string = {ip: true}];;
+  uint32 ratio = 2;
+  string dc = 3 [(validate.rules).string = {min_len: 1}];
+  bool disabled = 4;
+}
+
+message SignedEntry {
+  Entry entry = 1 [(validate.rules).message.required = true];
+  string signature = 2 [(validate.rules).string.min_len = 1];
+  healthchecks.v1.HealthCheck healthcheck = 3 [(validate.rules).message.required = true];
+}

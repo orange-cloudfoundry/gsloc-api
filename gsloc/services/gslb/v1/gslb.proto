@@ -1,0 +1,110 @@
+syntax = "proto3";
+
+package gsloc.services.gslb.v1;
+
+
+import "google/protobuf/empty.proto";
+import "validate/validate.proto";
+import "google/protobuf/wrappers.proto";
+import "google/api/annotations.proto";
+import "gsloc/api/config/entries/v1/entry.proto";
+import "gsloc/api/config/healthchecks/v1/healthcheck.proto";
+
+option go_package = "github.com/orange-cloudfoundry/gsloc-go-sdk/gsloc/services/gslb/v1;gslbsvc";
+
+enum MemberStatus {
+  ENABLED = 0;
+  DISABLED = 1;
+}
+
+
+message SetEntryRequest {
+  api.config.entries.v1.Entry entry = 1 [(validate.rules).message.required = true];
+  api.config.healthchecks.v1.HealthCheck healthcheck = 2 [(validate.rules).message.required = true];
+}
+
+message DeleteEntryRequest {
+  string fqdn = 1 [(validate.rules).string.min_len = 1];
+}
+
+message GetEntryRequest {
+  string fqdn = 1 [(validate.rules).string.min_len = 1];
+}
+
+message GetEntryResponse {
+  api.config.entries.v1.Entry entry = 1 [(validate.rules).message.required = true];
+  api.config.healthchecks.v1.HealthCheck healthcheck = 2 [(validate.rules).message.required = true];
+}
+
+message ListEntriesRequest {
+  repeated string tags = 1;
+  string prefix = 2;
+}
+
+message ListEntriesResponse {
+  repeated GetEntryResponse entries = 1;
+}
+
+message AddMemberRequest {
+  string fqdn = 1 [(validate.rules).string.min_len = 1];
+  api.config.entries.v1.Member member = 2 [(validate.rules).message.required = true];
+}
+
+message DeleteMemberRequest {
+  string fqdn = 1 [(validate.rules).string.min_len = 1];
+  string ip = 2 [(validate.rules).string.min_len = 1];
+}
+
+message SetMemberStatusRequest {
+  string fqdn = 1 [(validate.rules).string.min_len = 1];
+  string ip = 2 [(validate.rules).string.min_len = 1];
+  MemberStatus status = 3;
+}
+
+message SetMembersStatusByFilterRequest {
+  string prefix = 1;
+  string dc = 2;
+  repeated string tags = 3;
+  MemberStatus status = 4;
+}
+
+message SetHealthCheckRequest {
+  string fqdn = 1 [(validate.rules).string.min_len = 1];
+  api.config.healthchecks.v1.HealthCheck healthcheck = 2 [(validate.rules).message.required = true];
+}
+
+message ListDcsRequest {
+}
+
+message ListDcsResponse {
+  repeated string dcs = 1;
+}
+
+
+service GSLB {
+  rpc SetEntry (SetEntryRequest) returns (google.protobuf.Empty) {
+  }
+  rpc DeleteEntry (DeleteEntryRequest) returns (google.protobuf.Empty) {
+  }
+  rpc GetEntry (GetEntryRequest) returns (GetEntryResponse) {
+  }
+  rpc ListEntries (ListEntriesRequest) returns (ListEntriesResponse) {
+  }
+
+  rpc AddMember (AddMemberRequest) returns (google.protobuf.Empty) {
+  }
+  rpc DeleteMember (DeleteMemberRequest) returns (google.protobuf.Empty) {
+  }
+  rpc SetMemberStatus (SetMemberStatusRequest) returns (google.protobuf.Empty) {
+  }
+  rpc SetMembersStatusByFilter (SetMembersStatusByFilterRequest) returns (google.protobuf.Empty) {
+  }
+
+  rpc SetHealthCheck (SetHealthCheckRequest) returns (google.protobuf.Empty) {
+  }
+
+  rpc ListDcs (ListDcsRequest) returns (ListDcsResponse) {
+  }
+
+
+}

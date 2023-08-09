@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package gsloc.api.config.permission.v1;
+
+import "validate/validate.proto";
+
+option go_package = "github.com/orange-cloudfoundry/gsloc-go-sdk/gsloc/api/config/permission/v1;permission";
+
+// Role is the permission role.
+// READER: can read the entry.
+// WRITER: can read and update the entry.
+// OWNER: can read, update, delete and set permission on the entry.
+// Order is important, it is used to check if a user has a permission or higher.
+enum Role {
+  READER = 0;
+  WRITER = 10;
+  OWNER = 20;
+}
+
+// MemberType is the type of the member.
+enum ElementType {
+  USER = 0;
+  GROUP = 1;
+}
+
+// Member is a user or a group.
+message Element {
+  ElementType element_type = 1;
+  string element_name = 2;
+}
+
+// MemberPermission is a permission on a resource for a given member.
+message ElementPermission {
+  Role role = 1;
+  Element element = 2;
+}

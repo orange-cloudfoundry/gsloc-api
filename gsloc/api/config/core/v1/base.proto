@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package gsloc.api.config.core.v1;
+
+import "validate/validate.proto";
+
+option go_package = "github.com/orange-cloudfoundry/gsloc-go-sdk/gsloc/api/config/core/v1;core";
+
+// Header name/value pair.
+message HeaderValue {
+  // Header name.
+  string key = 1
+  [(validate.rules).string =
+  {min_len: 1 max_bytes: 16384 well_known_regex: HTTP_HEADER_NAME strict: false}];
+
+  // Header value.
+  string value = 2 [
+    (validate.rules).string = {max_bytes: 16384 well_known_regex: HTTP_HEADER_VALUE strict: false}
+  ];
+}
+
+// Header name/value pair plus option to control append behavior.
+message HeaderValueOption {
+
+  // Header name/value pair that this option applies to.
+  HeaderValue header = 1 [(validate.rules).message = {required: true}];
+
+  // Should the value be appended? If true (default), the value is appended to
+  // existing values. Otherwise it replaces any existing values.
+  bool append = 2;
+}

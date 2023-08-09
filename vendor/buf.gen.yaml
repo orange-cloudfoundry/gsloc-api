@@ -1,0 +1,8 @@
+version: v1
+plugins:
+  - plugin: buf.build/protocolbuffers/python:v23.0
+    out: ../../lbaas-python-sdk
+  - plugin: buf.build/protocolbuffers/js:v3.21.2
+    out: ../../lbaas-web/src/gen
+    opt:
+      - import_style=commonjs,binary

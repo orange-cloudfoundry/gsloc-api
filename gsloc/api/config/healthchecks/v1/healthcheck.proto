@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package gsloc.api.config.healthchecks.v1;
+
+import "validate/validate.proto";
+import "gsloc/api/config/core/v1/base.proto";
+import "gsloc/type/v1/http.proto";
+import "gsloc/type/v1/range.proto";
+import "gsloc/type/matcher/v1/string.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/orange-cloudfoundry/gsloc-go-sdk/gsloc/api/config/healthchecks/v1;hcconf";
+
+
+
+// Health check configuration.
+message HealthCheck {
+  // The time to wait for a health check response. If the timeout is reached the
+  // health check attempt will be considered a failure.
+  google.protobuf.Duration timeout = 1 [(validate.rules).duration = {
+    required: true
+    gt {}
+  }];
+
+  // The interval between health checks.
+  google.protobuf.Duration interval = 2 [(validate.rules).duration = {
+    required: true
+    gt {}
+  }];
+
+  // port specifies the port to use when performing health checks.
+  uint32 port = 3 [(validate.rules).uint32 = {gt: 0}];
+
+  oneof health_checker {
+    option (validate.required) = true;
+
+    // HTTP health check.
+    HttpHealthCheck http_health_check = 4;
+
+    // TCP health check.
+    TcpHealthCheck tcp_health_check = 5;
+
+    // gRPC health check.
+    GrpcHealthCheck grpc_health_check = 6;
+
+    // No health check.
+    NoHealthCheck no_health_check = 7;
+  }
+  // Enable TLS for healthcheck.
+  bool enable_tls = 8;
+}
+
+// Describes the encoding of the payload bytes in the payload.
+message HealthCheckPayload {
+  oneof payload {
+    option (validate.required) = true;
+
+    // Hex encoded payload. E.g., "000000FF".
+    string text = 1 [(validate.rules).string = {min_len: 1}];
+
+    // Binary payload.
+    bytes binary = 2;
+  }
+}
+
+// HTTP request method.
+enum RequestMethod {
+  METHOD_UNSPECIFIED = 0;
+  GET = 1;
+  HEAD = 2;
+  POST = 3;
+  PUT = 4;
+  DELETE = 5;
+  CONNECT = 6;
+  OPTIONS = 7;
+  TRACE = 8;
+  PATCH = 9;
+}
+
+
+message HttpHealthCheck {
+
+  // The value of the host header in the HTTP health check request. If
+  // left empty (default value), the name of the cluster this health check is associated
+  // with will be used.
+  string host = 1 [(validate.rules).string = {well_known_regex: HTTP_HEADER_VALUE strict: false ignore_empty: true}];
+
+  // Specifies the HTTP path that will be requested during health checking. For example
+  // */healthcheck*.
+  string path = 2
+  [(validate.rules).string = {min_len: 1 well_known_regex: HTTP_HEADER_VALUE strict: false}];
+
+  // HTTP specific payload.
+  HealthCheckPayload send = 3;
+
+  // HTTP specific response.
+  HealthCheckPayload receive = 4;
+
+  // Specifies a list of HTTP headers that should be added to each request that is sent to the
+  // health checked cluster.
+  repeated gsloc.api.config.core.v1.HeaderValueOption request_headers_to_add = 5 [(validate.rules).repeated = {max_items: 1000}];
+  // Specifies a list of HTTP response statuses considered healthy. If provided, replaces default
+  // 200-only policy - 200 must be included explicitly as needed. Ranges follow half-open
+  // semantics of Int64Range. The start and end of each
+  // range are required. Only statuses in the range [100, 600) are allowed.
+  gsloc.type.v1.Int64Range expected_statuses = 6;
+
+  // Use specified application protocol for health checks.
+  type.v1.CodecClientType codec_client_type = 7 [(validate.rules).enum = {defined_only: true}];
+
+  // HTTP Method that will be used for health checking, default is "GET".
+  // GET, HEAD, POST, PUT, DELETE, OPTIONS, TRACE, PATCH methods are supported, but making request body is not supported.
+  // CONNECT method is disallowed because it is not appropriate for health check request.
+  // If a non-200 response is expected by the method, it needs to be set in expected_statuses.
+  RequestMethod method = 8 [(validate.rules).enum = {defined_only: true not_in: 6}];
+}
+
+message TcpHealthCheck {
+  // Empty payloads imply a connect-only health check.
+  HealthCheckPayload send = 1;
+
+  // When checking the response, “fuzzy” matching is performed such that each
+  // binary block must be found, and in the order specified, but not
+  // necessarily contiguous.
+  repeated HealthCheckPayload receive = 2;
+}
+
+// `grpc.health.v1.Health
+// <https://github.com/grpc/grpc/blob/master/src/proto/grpc/health/v1/health.proto>`_-based
+// healthcheck. See `gRPC doc <https://github.com/grpc/grpc/blob/master/doc/health-checking.md>`_
+// for details.
+message GrpcHealthCheck {
+  // An optional service name parameter which will be sent to gRPC service in
+  // `grpc.health.v1.HealthCheckRequest
+  // <https://github.com/grpc/grpc/blob/master/src/proto/grpc/health/v1/health.proto#L20>`_.
+  // message. See `gRPC health-checking overview
+  // <https://github.com/grpc/grpc/blob/master/doc/health-checking.md>`_ for more information.
+  string service_name = 1;
+
+  // The value of the :authority header in the gRPC health check request. If
+  // left empty (default value), the name of the cluster this health check is associated
+  // with will be used. The authority header can be customized for a specific endpoint by setting
+  // the HealthCheckConfig.hostname field.
+  string authority = 2
+  [(validate.rules).string = {well_known_regex: HTTP_HEADER_VALUE strict: false}];
+}
+
+// No health check. This health check is always considered healthy.
+// This is particularly useful for udp route which cannot be health checked.
+message NoHealthCheck {
+
+}

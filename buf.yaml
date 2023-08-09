@@ -1,0 +1,14 @@
+version: v1
+breaking:
+  use:
+    - FILE
+build:
+  excludes:
+    - .buf-cache
+    - vendor
+lint:
+  use:
+    - DEFAULT
+deps:
+  - buf.build/envoyproxy/protoc-gen-validate
+  - buf.build/googleapis/googleapis

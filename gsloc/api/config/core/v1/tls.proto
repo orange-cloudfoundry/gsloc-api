@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package gsloc.api.config.core.v1;
+
+import "validate/validate.proto";
+
+option go_package = "github.com/orange-cloudfoundry/gsloc-go-sdk/gsloc/api/config/core/v1;core";
+
+// TLS is a message containing the configuration for a TLS listener.
+message TLS {
+  // If non-empty, a list of server names (e.g. SNI for TLS protocol) to consider when determining a filter chain match.
+  // Those values will be compared against the server names of a new connection, when detected by one of the listener filters.
+  //
+  //The server name will be matched against all wildcard domains, i.e. www.example.com will be first matched against
+  // www.example.com, then *.example.com, then *.com.
+  //
+  //Note that partial wildcards are not supported, and values like *w.example.com are invalid.
+  repeated string server_names = 1;
+
+  repeated string certificates_uuid = 2 [(validate.rules).repeated.min_items = 1];
+
+  // Supplies the list of ALPN protocols that the listener should expose. In
+  // practice this is likely to be set to one of two values (see the
+  //
+  // * "h2,http/1.1" If the listener is going to support both HTTP/2 and HTTP/1.1.
+  // * "http/1.1" If the listener is only going to support HTTP/1.1.
+  //
+  // There is no default for this parameter. If empty, tls handshake will not expose ALPN.
+  repeated string alpn_protocols = 3;
+}
