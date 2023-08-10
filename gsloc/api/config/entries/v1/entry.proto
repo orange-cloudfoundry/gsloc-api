@@ -12,7 +12,7 @@ enum LBAlgo {
   ROUND_ROBIN = 0;
   TOPOLOGY = 1;
   RATIO = 2;
-  RETURN_TO_DNS = 3;
+  RANDOM = 3;
 }
 
 message Entry {

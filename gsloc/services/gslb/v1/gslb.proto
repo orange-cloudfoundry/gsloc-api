@@ -12,7 +12,7 @@ import "gsloc/api/config/healthchecks/v1/healthcheck.proto";
 
 option go_package = "github.com/orange-cloudfoundry/gsloc-go-sdk/gsloc/services/gslb/v1;gslbsvc";
 
-enum MemberStatus {
+enum MemberState {
   ENABLED = 0;
   DISABLED = 1;
 }
@@ -58,14 +58,14 @@ message DeleteMemberRequest {
 message SetMemberStatusRequest {
   string fqdn = 1 [(validate.rules).string.min_len = 1];
   string ip = 2 [(validate.rules).string.min_len = 1];
-  MemberStatus status = 3;
+  MemberState status = 3;
 }
 
 message SetMembersStatusByFilterRequest {
   string prefix = 1;
   string dc = 2;
   repeated string tags = 3;
-  MemberStatus status = 4;
+  MemberState status = 4;
 }
 
 message SetHealthCheckRequest {
@@ -80,6 +80,27 @@ message ListDcsResponse {
   repeated string dcs = 1;
 }
 
+message MemberStatus {
+  string ip = 1 [(validate.rules).string = {ip: true}];
+  string dc = 2 [(validate.rules).string.min_len = 1];
+  enum Status {
+    ONLINE = 0;
+    OFFLINE = 1;
+    CHECK_FAILED = 2;
+  }
+  Status status = 3;
+  string failure_reason = 4;
+}
+
+message GetEntryStatusRequest {
+  string fqdn = 1 [(validate.rules).string.min_len = 1];
+}
+
+message GetEntryStatusResponse {
+  string fqdn = 1 [(validate.rules).string.min_len = 1];
+  repeated MemberStatus members_ipv4 = 2;
+  repeated MemberStatus members_ipv6 = 3;
+}
 
 service GSLB {
   rpc SetEntry (SetEntryRequest) returns (google.protobuf.Empty) {
@@ -89,6 +110,8 @@ service GSLB {
   rpc GetEntry (GetEntryRequest) returns (GetEntryResponse) {
   }
   rpc ListEntries (ListEntriesRequest) returns (ListEntriesResponse) {
+  }
+  rpc GetEntryStatus (GetEntryStatusRequest) returns (GetEntryStatusResponse) {
   }
 
   rpc AddMember (AddMemberRequest) returns (google.protobuf.Empty) {
@@ -105,6 +128,5 @@ service GSLB {
 
   rpc ListDcs (ListDcsRequest) returns (ListDcsResponse) {
   }
-
 
 }

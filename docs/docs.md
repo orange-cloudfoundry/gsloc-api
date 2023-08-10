@@ -49,16 +49,20 @@
     - [DeleteMemberRequest](#gsloc-services-gslb-v1-DeleteMemberRequest)
     - [GetEntryRequest](#gsloc-services-gslb-v1-GetEntryRequest)
     - [GetEntryResponse](#gsloc-services-gslb-v1-GetEntryResponse)
+    - [GetEntryStatusRequest](#gsloc-services-gslb-v1-GetEntryStatusRequest)
+    - [GetEntryStatusResponse](#gsloc-services-gslb-v1-GetEntryStatusResponse)
     - [ListDcsRequest](#gsloc-services-gslb-v1-ListDcsRequest)
     - [ListDcsResponse](#gsloc-services-gslb-v1-ListDcsResponse)
     - [ListEntriesRequest](#gsloc-services-gslb-v1-ListEntriesRequest)
     - [ListEntriesResponse](#gsloc-services-gslb-v1-ListEntriesResponse)
+    - [MemberStatus](#gsloc-services-gslb-v1-MemberStatus)
     - [SetEntryRequest](#gsloc-services-gslb-v1-SetEntryRequest)
     - [SetHealthCheckRequest](#gsloc-services-gslb-v1-SetHealthCheckRequest)
     - [SetMemberStatusRequest](#gsloc-services-gslb-v1-SetMemberStatusRequest)
     - [SetMembersStatusByFilterRequest](#gsloc-services-gslb-v1-SetMembersStatusByFilterRequest)
   
-    - [MemberStatus](#gsloc-services-gslb-v1-MemberStatus)
+    - [MemberState](#gsloc-services-gslb-v1-MemberState)
+    - [MemberStatus.Status](#gsloc-services-gslb-v1-MemberStatus-Status)
   
     - [GSLB](#gsloc-services-gslb-v1-GSLB)
   
@@ -569,7 +573,7 @@ HTTP request method.
 | ROUND_ROBIN | 0 |  |
 | TOPOLOGY | 1 |  |
 | RATIO | 2 |  |
-| RETURN_TO_DNS | 3 |  |
+| RANDOM | 3 |  |
 
 
  
@@ -665,6 +669,38 @@ HTTP request method.
 
 
 
+<a name="gsloc-services-gslb-v1-GetEntryStatusRequest"></a>
+
+### GetEntryStatusRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| fqdn | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="gsloc-services-gslb-v1-GetEntryStatusResponse"></a>
+
+### GetEntryStatusResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| fqdn | [string](#string) |  |  |
+| members_ipv4 | [MemberStatus](#gsloc-services-gslb-v1-MemberStatus) | repeated |  |
+| members_ipv6 | [MemberStatus](#gsloc-services-gslb-v1-MemberStatus) | repeated |  |
+
+
+
+
+
+
 <a name="gsloc-services-gslb-v1-ListDcsRequest"></a>
 
 ### ListDcsRequest
@@ -721,6 +757,24 @@ HTTP request method.
 
 
 
+<a name="gsloc-services-gslb-v1-MemberStatus"></a>
+
+### MemberStatus
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| ip | [string](#string) |  |  |
+| dc | [string](#string) |  |  |
+| status | [MemberStatus.Status](#gsloc-services-gslb-v1-MemberStatus-Status) |  |  |
+| failure_reason | [string](#string) |  |  |
+
+
+
+
+
+
 <a name="gsloc-services-gslb-v1-SetEntryRequest"></a>
 
 ### SetEntryRequest
@@ -763,7 +817,7 @@ HTTP request method.
 | ----- | ---- | ----- | ----------- |
 | fqdn | [string](#string) |  |  |
 | ip | [string](#string) |  |  |
-| status | [MemberStatus](#gsloc-services-gslb-v1-MemberStatus) |  |  |
+| status | [MemberState](#gsloc-services-gslb-v1-MemberState) |  |  |
 
 
 
@@ -781,7 +835,7 @@ HTTP request method.
 | prefix | [string](#string) |  |  |
 | dc | [string](#string) |  |  |
 | tags | [string](#string) | repeated |  |
-| status | [MemberStatus](#gsloc-services-gslb-v1-MemberStatus) |  |  |
+| status | [MemberState](#gsloc-services-gslb-v1-MemberState) |  |  |
 
 
 
@@ -790,15 +844,28 @@ HTTP request method.
  
 
 
-<a name="gsloc-services-gslb-v1-MemberStatus"></a>
+<a name="gsloc-services-gslb-v1-MemberState"></a>
 
-### MemberStatus
+### MemberState
 
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
 | ENABLED | 0 |  |
 | DISABLED | 1 |  |
+
+
+
+<a name="gsloc-services-gslb-v1-MemberStatus-Status"></a>
+
+### MemberStatus.Status
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| ONLINE | 0 |  |
+| OFFLINE | 1 |  |
+| CHECK_FAILED | 2 |  |
 
 
  
@@ -817,6 +884,7 @@ HTTP request method.
 | DeleteEntry | [DeleteEntryRequest](#gsloc-services-gslb-v1-DeleteEntryRequest) | [.google.protobuf.Empty](#google-protobuf-Empty) |  |
 | GetEntry | [GetEntryRequest](#gsloc-services-gslb-v1-GetEntryRequest) | [GetEntryResponse](#gsloc-services-gslb-v1-GetEntryResponse) |  |
 | ListEntries | [ListEntriesRequest](#gsloc-services-gslb-v1-ListEntriesRequest) | [ListEntriesResponse](#gsloc-services-gslb-v1-ListEntriesResponse) |  |
+| GetEntryStatus | [GetEntryStatusRequest](#gsloc-services-gslb-v1-GetEntryStatusRequest) | [GetEntryStatusResponse](#gsloc-services-gslb-v1-GetEntryStatusResponse) |  |
 | AddMember | [AddMemberRequest](#gsloc-services-gslb-v1-AddMemberRequest) | [.google.protobuf.Empty](#google-protobuf-Empty) |  |
 | DeleteMember | [DeleteMemberRequest](#gsloc-services-gslb-v1-DeleteMemberRequest) | [.google.protobuf.Empty](#google-protobuf-Empty) |  |
 | SetMemberStatus | [SetMemberStatusRequest](#gsloc-services-gslb-v1-SetMemberStatusRequest) | [.google.protobuf.Empty](#google-protobuf-Empty) |  |
