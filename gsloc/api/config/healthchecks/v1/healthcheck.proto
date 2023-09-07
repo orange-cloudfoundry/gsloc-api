@@ -48,8 +48,19 @@ message HealthCheck {
     // No health check.
     NoHealthCheck no_health_check = 7;
   }
+
+  // set tls configuration for healthcheck
+  TlsConfig tls_config = 8;
+
+}
+
+message TlsConfig {
   // Enable TLS for healthcheck.
-  bool enable_tls = 8;
+  bool enable = 1;
+  // The CA certificate to use for healthcheck. this is not necessary if the CA certificate is already in the system trust store.
+  string ca = 2;
+  // The server name to use for healthcheck. By default server name take the value of the fqdn entry
+  string server_name = 3;
 }
 
 // Describes the encoding of the payload bytes in the payload.

@@ -33,6 +33,7 @@
     - [HttpHealthCheck](#gsloc-api-config-healthchecks-v1-HttpHealthCheck)
     - [NoHealthCheck](#gsloc-api-config-healthchecks-v1-NoHealthCheck)
     - [TcpHealthCheck](#gsloc-api-config-healthchecks-v1-TcpHealthCheck)
+    - [TlsConfig](#gsloc-api-config-healthchecks-v1-TlsConfig)
   
     - [RequestMethod](#gsloc-api-config-healthchecks-v1-RequestMethod)
   
@@ -401,7 +402,7 @@ Health check configuration.
 | tcp_health_check | [TcpHealthCheck](#gsloc-api-config-healthchecks-v1-TcpHealthCheck) |  | TCP health check. |
 | grpc_health_check | [GrpcHealthCheck](#gsloc-api-config-healthchecks-v1-GrpcHealthCheck) |  | gRPC health check. |
 | no_health_check | [NoHealthCheck](#gsloc-api-config-healthchecks-v1-NoHealthCheck) |  | No health check. |
-| enable_tls | [bool](#bool) |  | Enable TLS for healthcheck. |
+| tls_config | [TlsConfig](#gsloc-api-config-healthchecks-v1-TlsConfig) |  | set tls configuration for healthcheck |
 
 
 
@@ -467,6 +468,23 @@ This is particularly useful for udp route which cannot be health checked.
 | ----- | ---- | ----- | ----------- |
 | send | [HealthCheckPayload](#gsloc-api-config-healthchecks-v1-HealthCheckPayload) |  | Empty payloads imply a connect-only health check. |
 | receive | [HealthCheckPayload](#gsloc-api-config-healthchecks-v1-HealthCheckPayload) | repeated | When checking the response, “fuzzy” matching is performed such that each binary block must be found, and in the order specified, but not necessarily contiguous. |
+
+
+
+
+
+
+<a name="gsloc-api-config-healthchecks-v1-TlsConfig"></a>
+
+### TlsConfig
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| enable | [bool](#bool) |  | Enable TLS for healthcheck. |
+| ca | [string](#string) |  | The CA certificate to use for healthcheck. this is not necessary if the CA certificate is already in the system trust store. |
+| server_name | [string](#string) |  | The server name to use for healthcheck. By default server name take the value of the fqdn entry |
 
 
 
