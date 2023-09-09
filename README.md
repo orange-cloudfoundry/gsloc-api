@@ -23,7 +23,7 @@ You can see the api docs at [docs/docs.md](/docs/docs.md).
 
 You can find schemas in [docs folder](/docs), doc in graphml format can be updated with [yed](https://yed.yworks.com).
 
-Intended architecture is as follow:
+Intended architecture is as follow (note that [dnsdist](https://dnsdist.org/) is optional):
 
 [![architecture](/docs/archi.png)](/docs/archi.png)
 
