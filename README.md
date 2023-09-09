@@ -19,9 +19,13 @@ You can see the api docs at [docs/docs.md](/docs/docs.md).
 3. Run `buf generate`
 4. You can now see python generated code in `../gsloc-python-sdk` and go code generated in `../gsloc-go-sdk`
 
-## Schemas
+## Schemas And architecture
 
-You can find schemas in [docs folder](/docs), doc in graphml format can be updated with [yed](https://yed.yworks.com)
+You can find schemas in [docs folder](/docs), doc in graphml format can be updated with [yed](https://yed.yworks.com).
+
+Intended architecture is as follow:
+
+[![architecture](/docs/archi.png)](/docs/archi.png)
 
 ## Other GSLoC repositories 
 
