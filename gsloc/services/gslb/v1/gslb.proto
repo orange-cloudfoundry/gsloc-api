@@ -97,6 +97,16 @@ message MemberStatus {
   string failure_reason = 4;
 }
 
+message ListEntriesStatusRequest {
+  repeated string tags = 1;
+  string prefix = 2;
+}
+
+message ListEntriesStatusResponse {
+  repeated GetEntryStatusResponse entries_status = 1;
+}
+
+
 message GetEntryStatusRequest {
   string fqdn = 1 [(validate.rules).string.min_len = 1];
 }
@@ -133,6 +143,15 @@ message GetHealthCheckResponse {
   api.config.healthchecks.v1.HealthCheck healthcheck = 1 [(validate.rules).message.required = true];
 }
 
+message PluginHealthCheckInfo {
+  string name = 1;
+  string description = 2;
+}
+
+message ListPluginHealthChecksResponse {
+  repeated PluginHealthCheckInfo plugin_health_checks = 1;
+}
+
 service GSLB {
   rpc SetEntry (SetEntryRequest) returns (google.protobuf.Empty) {
   }
@@ -143,6 +162,8 @@ service GSLB {
   rpc ListEntries (ListEntriesRequest) returns (ListEntriesResponse) {
   }
   rpc GetEntryStatus (GetEntryStatusRequest) returns (GetEntryStatusResponse) {
+  }
+  rpc ListEntriesStatus (ListEntriesStatusRequest) returns (ListEntriesStatusResponse) {
   }
 
   rpc SetMember (SetMemberRequest) returns (google.protobuf.Empty) {
@@ -164,4 +185,6 @@ service GSLB {
   rpc ListDcs (ListDcsRequest) returns (ListDcsResponse) {
   }
 
+  rpc ListPluginHealthChecks (google.protobuf.Empty) returns (ListPluginHealthChecksResponse) {
+  }
 }

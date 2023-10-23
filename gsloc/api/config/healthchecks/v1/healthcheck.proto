@@ -47,6 +47,15 @@ message HealthCheck {
 
     // No health check.
     NoHealthCheck no_health_check = 7;
+
+    // Plugin health check.
+    PluginHealthCheck plugin_health_check = 9;
+
+    // ICMP health check.
+    IcmpHealthCheck icmp_health_check = 10;
+
+    // UDP health check.
+    UdpHealthCheck udp_health_check = 11;
   }
 
   // set tls configuration for healthcheck
@@ -162,4 +171,49 @@ message GrpcHealthCheck {
 // This is particularly useful for udp route which cannot be health checked.
 message NoHealthCheck {
 
+}
+
+// Plugin health check by using a external program defined in the plugin configuration in the server.
+// Plugin name and description can be view in service list plugins.
+message PluginHealthCheck {
+  // The name of the plugin to use for health checking.
+  string name = 1 [(validate.rules).string = {min_len: 1}];
+  // The options to pass to the plugin.
+  google.protobuf.Struct options = 2;
+}
+
+// ICMP health check also known as ping.
+message IcmpHealthCheck {
+  // Delay specifies the delay between ICMP reply read try. If left empty (default to 1s).
+  google.protobuf.Duration delay = 1 [(validate.rules).duration = {
+    required: true
+    gt {}
+  }];
+}
+
+// UDP health check.
+// It has 2 behaviors:
+// - if receive is not empty, it will send the payload and check the response received by server with receive.
+// - (Weak method) if receive is empty, it will ping the server if not responding it will be considered as unhealthy,
+//   if it's responding it will send the payload and wait to receive a Port Unreachable ICMP message,
+//   if not has been received after the timeout it will considered healthy.
+message UdpHealthCheck {
+  // Udp specific payload to send.
+  // It always send something to test UDP connection.
+  // If left empty (default to "test-gohc")
+  HealthCheckPayload send = 1;
+  // When checking the response, “fuzzy” matching is performed such that each
+  // binary block must be found, and in the order specified, but not
+  // necessarily contiguous.
+  repeated HealthCheckPayload receive = 2;
+  // PingTimeout specifies the timeout for ICMP requests. If left empty (default to 5s)
+  google.protobuf.Duration ping_timeout = 3 [(validate.rules).duration = {
+    required: true
+    gt {}
+  }];
+  // Delay specifies the delay between ICMP requests. If left empty (default to 1s)
+  google.protobuf.Duration delay = 4 [(validate.rules).duration = {
+    required: true
+    gt {}
+  }];
 }

@@ -31,9 +31,12 @@
     - [HealthCheck](#gsloc-api-config-healthchecks-v1-HealthCheck)
     - [HealthCheckPayload](#gsloc-api-config-healthchecks-v1-HealthCheckPayload)
     - [HttpHealthCheck](#gsloc-api-config-healthchecks-v1-HttpHealthCheck)
+    - [IcmpHealthCheck](#gsloc-api-config-healthchecks-v1-IcmpHealthCheck)
     - [NoHealthCheck](#gsloc-api-config-healthchecks-v1-NoHealthCheck)
+    - [PluginHealthCheck](#gsloc-api-config-healthchecks-v1-PluginHealthCheck)
     - [TcpHealthCheck](#gsloc-api-config-healthchecks-v1-TcpHealthCheck)
     - [TlsConfig](#gsloc-api-config-healthchecks-v1-TlsConfig)
+    - [UdpHealthCheck](#gsloc-api-config-healthchecks-v1-UdpHealthCheck)
   
     - [RequestMethod](#gsloc-api-config-healthchecks-v1-RequestMethod)
   
@@ -59,9 +62,13 @@
     - [ListDcsResponse](#gsloc-services-gslb-v1-ListDcsResponse)
     - [ListEntriesRequest](#gsloc-services-gslb-v1-ListEntriesRequest)
     - [ListEntriesResponse](#gsloc-services-gslb-v1-ListEntriesResponse)
+    - [ListEntriesStatusRequest](#gsloc-services-gslb-v1-ListEntriesStatusRequest)
+    - [ListEntriesStatusResponse](#gsloc-services-gslb-v1-ListEntriesStatusResponse)
     - [ListMembersRequest](#gsloc-services-gslb-v1-ListMembersRequest)
     - [ListMembersResponse](#gsloc-services-gslb-v1-ListMembersResponse)
+    - [ListPluginHealthChecksResponse](#gsloc-services-gslb-v1-ListPluginHealthChecksResponse)
     - [MemberStatus](#gsloc-services-gslb-v1-MemberStatus)
+    - [PluginHealthCheckInfo](#gsloc-services-gslb-v1-PluginHealthCheckInfo)
     - [SetEntryRequest](#gsloc-services-gslb-v1-SetEntryRequest)
     - [SetHealthCheckRequest](#gsloc-services-gslb-v1-SetHealthCheckRequest)
     - [SetMemberRequest](#gsloc-services-gslb-v1-SetMemberRequest)
@@ -402,6 +409,9 @@ Health check configuration.
 | tcp_health_check | [TcpHealthCheck](#gsloc-api-config-healthchecks-v1-TcpHealthCheck) |  | TCP health check. |
 | grpc_health_check | [GrpcHealthCheck](#gsloc-api-config-healthchecks-v1-GrpcHealthCheck) |  | gRPC health check. |
 | no_health_check | [NoHealthCheck](#gsloc-api-config-healthchecks-v1-NoHealthCheck) |  | No health check. |
+| plugin_health_check | [PluginHealthCheck](#gsloc-api-config-healthchecks-v1-PluginHealthCheck) |  | Plugin health check. |
+| icmp_health_check | [IcmpHealthCheck](#gsloc-api-config-healthchecks-v1-IcmpHealthCheck) |  | ICMP health check. |
+| udp_health_check | [UdpHealthCheck](#gsloc-api-config-healthchecks-v1-UdpHealthCheck) |  | UDP health check. |
 | tls_config | [TlsConfig](#gsloc-api-config-healthchecks-v1-TlsConfig) |  | set tls configuration for healthcheck |
 
 
@@ -447,11 +457,43 @@ Describes the encoding of the payload bytes in the payload.
 
 
 
+<a name="gsloc-api-config-healthchecks-v1-IcmpHealthCheck"></a>
+
+### IcmpHealthCheck
+ICMP health check also known as ping.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| delay | [google.protobuf.Duration](#google-protobuf-Duration) |  | Delay specifies the delay between ICMP reply read try. If left empty (default to 1s). |
+
+
+
+
+
+
 <a name="gsloc-api-config-healthchecks-v1-NoHealthCheck"></a>
 
 ### NoHealthCheck
 No health check. This health check is always considered healthy.
 This is particularly useful for udp route which cannot be health checked.
+
+
+
+
+
+
+<a name="gsloc-api-config-healthchecks-v1-PluginHealthCheck"></a>
+
+### PluginHealthCheck
+Plugin health check by using a external program defined in the plugin configuration in the server.
+Plugin name and description can be view in service list plugins.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) |  | The name of the plugin to use for health checking. |
+| options | [google.protobuf.Struct](#google-protobuf-Struct) |  | The options to pass to the plugin. |
 
 
 
@@ -485,6 +527,29 @@ This is particularly useful for udp route which cannot be health checked.
 | enable | [bool](#bool) |  | Enable TLS for healthcheck. |
 | ca | [string](#string) |  | The CA certificate to use for healthcheck. this is not necessary if the CA certificate is already in the system trust store. |
 | server_name | [string](#string) |  | The server name to use for healthcheck. By default server name take the value of the fqdn entry |
+
+
+
+
+
+
+<a name="gsloc-api-config-healthchecks-v1-UdpHealthCheck"></a>
+
+### UdpHealthCheck
+UDP health check.
+It has 2 behaviors:
+- if receive is not empty, it will send the payload and check the response received by server with receive.
+- (Weak method) if receive is empty, it will ping the server if not responding it will be considered as unhealthy,
+  if it&#39;s responding it will send the payload and wait to receive a Port Unreachable ICMP message,
+  if not has been received after the timeout it will considered healthy.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| send | [HealthCheckPayload](#gsloc-api-config-healthchecks-v1-HealthCheckPayload) |  | Udp specific payload to send. It always send something to test UDP connection. If left empty (default to &#34;test-gohc&#34;) |
+| receive | [HealthCheckPayload](#gsloc-api-config-healthchecks-v1-HealthCheckPayload) | repeated | When checking the response, “fuzzy” matching is performed such that each binary block must be found, and in the order specified, but not necessarily contiguous. |
+| ping_timeout | [google.protobuf.Duration](#google-protobuf-Duration) |  | PingTimeout specifies the timeout for ICMP requests. If left empty (default to 5s) |
+| delay | [google.protobuf.Duration](#google-protobuf-Duration) |  | Delay specifies the delay between ICMP requests. If left empty (default to 1s) |
 
 
 
@@ -827,6 +892,37 @@ HTTP request method.
 
 
 
+<a name="gsloc-services-gslb-v1-ListEntriesStatusRequest"></a>
+
+### ListEntriesStatusRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| tags | [string](#string) | repeated |  |
+| prefix | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="gsloc-services-gslb-v1-ListEntriesStatusResponse"></a>
+
+### ListEntriesStatusResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| entries_status | [GetEntryStatusResponse](#gsloc-services-gslb-v1-GetEntryStatusResponse) | repeated |  |
+
+
+
+
+
+
 <a name="gsloc-services-gslb-v1-ListMembersRequest"></a>
 
 ### ListMembersRequest
@@ -858,6 +954,21 @@ HTTP request method.
 
 
 
+<a name="gsloc-services-gslb-v1-ListPluginHealthChecksResponse"></a>
+
+### ListPluginHealthChecksResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| plugin_health_checks | [PluginHealthCheckInfo](#gsloc-services-gslb-v1-PluginHealthCheckInfo) | repeated |  |
+
+
+
+
+
+
 <a name="gsloc-services-gslb-v1-MemberStatus"></a>
 
 ### MemberStatus
@@ -870,6 +981,22 @@ HTTP request method.
 | dc | [string](#string) |  |  |
 | status | [MemberStatus.Status](#gsloc-services-gslb-v1-MemberStatus-Status) |  |  |
 | failure_reason | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="gsloc-services-gslb-v1-PluginHealthCheckInfo"></a>
+
+### PluginHealthCheckInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) |  |  |
+| description | [string](#string) |  |  |
 
 
 
@@ -1018,6 +1145,7 @@ HTTP request method.
 | GetEntry | [GetEntryRequest](#gsloc-services-gslb-v1-GetEntryRequest) | [GetEntryResponse](#gsloc-services-gslb-v1-GetEntryResponse) |  |
 | ListEntries | [ListEntriesRequest](#gsloc-services-gslb-v1-ListEntriesRequest) | [ListEntriesResponse](#gsloc-services-gslb-v1-ListEntriesResponse) |  |
 | GetEntryStatus | [GetEntryStatusRequest](#gsloc-services-gslb-v1-GetEntryStatusRequest) | [GetEntryStatusResponse](#gsloc-services-gslb-v1-GetEntryStatusResponse) |  |
+| ListEntriesStatus | [ListEntriesStatusRequest](#gsloc-services-gslb-v1-ListEntriesStatusRequest) | [ListEntriesStatusResponse](#gsloc-services-gslb-v1-ListEntriesStatusResponse) |  |
 | SetMember | [SetMemberRequest](#gsloc-services-gslb-v1-SetMemberRequest) | [.google.protobuf.Empty](#google-protobuf-Empty) |  |
 | DeleteMember | [DeleteMemberRequest](#gsloc-services-gslb-v1-DeleteMemberRequest) | [.google.protobuf.Empty](#google-protobuf-Empty) |  |
 | GetMember | [GetMemberRequest](#gsloc-services-gslb-v1-GetMemberRequest) | [GetMemberResponse](#gsloc-services-gslb-v1-GetMemberResponse) |  |
@@ -1026,6 +1154,7 @@ HTTP request method.
 | GetHealthCheck | [GetHealthCheckRequest](#gsloc-services-gslb-v1-GetHealthCheckRequest) | [GetHealthCheckResponse](#gsloc-services-gslb-v1-GetHealthCheckResponse) |  |
 | SetHealthCheck | [SetHealthCheckRequest](#gsloc-services-gslb-v1-SetHealthCheckRequest) | [.google.protobuf.Empty](#google-protobuf-Empty) |  |
 | ListDcs | [ListDcsRequest](#gsloc-services-gslb-v1-ListDcsRequest) | [ListDcsResponse](#gsloc-services-gslb-v1-ListDcsResponse) |  |
+| ListPluginHealthChecks | [.google.protobuf.Empty](#google-protobuf-Empty) | [ListPluginHealthChecksResponse](#gsloc-services-gslb-v1-ListPluginHealthChecksResponse) |  |
 
  
 
